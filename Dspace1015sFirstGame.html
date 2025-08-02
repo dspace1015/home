@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<title>Dspace1015's First game</title>
+<html lang = "en">
+<canvas id="myCanvas" width="1000" height="600" style="border:1px solid grey"></canvas>
+
+<script>
+const myCanvas = document.getElementById("myCanvas");
+const screen = myCanvas.getContext("2d");
+var x = 0;
+var y = 0;
+var vx = 0;
+var vy = 0;
+var g = -250;
+var Key = [0,0,0,0];
+var dt = 0;
+screen.transform(1,0,0,-1,500,300);
+var pressedKeys = {};
+window.onkeyup = function(e) { pressedKeys[e.keyCode] = false; }
+window.onkeydown = function(e) { pressedKeys[e.keyCode] = true; }
+// loop setup
+function animate(currentTime) {
+    // time handling
+    var currentTime = new Date().getTime()/1000;
+    dt = currentTime - _lastRAF ; // time elapsed since last frame
+    // call again please
+    requestAnimationFrame(animate); 
+    //update Values
+    if(pressedKeys[87]){vy += 500*dt}
+    if(pressedKeys[65]){vx -= 500*dt}
+    if(pressedKeys[83]){vy -= 500*dt}
+    if(pressedKeys[68]){vx += 500*dt}
+    vy += g*dt;
+    x += vx*dt;
+    y += vy*dt;
+    if(y<=-250){vy = 0;y = -250;vx *= Math.exp(-5*dt);}
+    if(pressedKeys[82]){vx = 0;vy=0;x=0;y=0;}
+    //update Screen
+    screen.setTransform(1,0,0,-1,500,300);
+    screen.clearRect(-screen.canvas.width/2,-screen.canvas.height/2,screen.canvas.width, screen.canvas.height);
+    screen.fillRect(x-50,y-50,100,100);
+    screen.setTransform(1,0,0,1,0,0);
+    screen.font = "32px Arial";
+    screen.fillText("FPS: "+Math.round(1/dt),0,50);
+    
+    _lastRAF = currentTime;
+}
+ function launchAnimation() {
+    requestAnimationFrame(_launchAnimationNow);
+    function _launchAnimationNow(currentTime) {
+        currentTime =  new Date().getTime()/1000;
+        _lastRAF = currentTime;
+        requestAnimationFrame(animate);
+    }
+}
+launchAnimation();
+</script>
+<a href="https://dspace1015.github.io">Home</a>
+</html>
