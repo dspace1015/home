@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<title>Countdown To New Years</title>
+<html lang = "en">
+<head>
+    <style type="text/css">
+        body {margin: 0px;}
+    </style>
+</head>
+<canvas id="myCanvas" width="1000" height="600" style="border:1px solid grey">You cant view it in schoology sadly you have to download it.</canvas>
+
+<script>
+const myCanvas = document.getElementById("myCanvas");
+const screen = myCanvas.getContext("2d");
+myCanvas.width = document.documentElement.clientWidth -2;
+myCanvas.height = document.documentElement.clientHeight - 7;
+var x = 0;
+var y = 0;
+var camx = 0;
+var camy = 0;
+var zoom = 0.0001;
+var dt = 0;
+var manual_scaling = false;
+// orbital paramaters:
+var a3 = 149597887;
+var e3 = 0.0167102159672;
+var A3 = -11.26064+114.20783;
+var v3 = 256680;
+var p3 = 31558149;
+var R3 = 6378.135;
+var t3;
+var r3;
+var x;
+var y;
+var d;
+var T;
+var Rsun = 695700;
+var newyears = 788918400.0;
+function cos(x){
+    return Math.cos(x*Math.PI/180);
+}
+function sin(x){
+    return Math.sin(x*Math.PI/180);
+}
+screen.transform(1,0,0,-1,500,300);
+var pressedKeys = {};
+window.onkeyup = function(e) { pressedKeys[e.keyCode] = false; }
+window.onkeydown = function(e) { pressedKeys[e.keyCode] = true; }
+
+function animate(currentTime) {
+    // time handling
+    var currentTime = new Date().getTime()/1000;
+    dt = currentTime - _lastRAF ; // time elapsed since last frame
+    // call again please
+    requestAnimationFrame(animate); 
+    myCanvas.width = document.documentElement.clientWidth -2;
+    myCanvas.height = document.documentElement.clientHeight - 7;
+    //update Values
+    T = currentTime - 946706400.0 - 86400;
+    if(pressedKeys[87]){zoom *= Math.exp(2*dt);manual_scaling = true;} 
+    if(pressedKeys[83]){zoom *= Math.exp(-2*dt);manual_scaling = true;}
+    if(pressedKeys[70]){manual_scaling = false;}
+    if(!manual_scaling){
+        zoom = Math.min(screen.canvas.width,screen.canvas.height)/(2*d)
+        if(zoom>0.04){
+            zoom = 0.04;
+        }
+    }
+    //Earth Position
+    t3 = 180-(360*(T-v3))/p3 - A3;
+    r3 = (a3*(1-e3**2))/(1+e3*cos(t3+A3));
+    x = -r3*cos(t3)-2*e3*a3*cos(A3);
+    y = r3*sin(t3)-2*e3*a3*sin(A3);
+    camx = x;
+    camy = y;
+    //Earth Position At newyears
+    var Nx = -(a3*(1-e3**2)*cos(180 - (360*(newyears-v3)/(p3)) - A3))/(1 + e3*cos(180 - (360*(newyears-v3))/(p3))) - 2*e3*a3*cos(A3);
+    var Ny =  (a3*(1-e3**2)*sin(180 - (360*(newyears-v3)/(p3)) - A3))/(1 + e3*cos(180 - (360*(newyears-v3))/(p3))) - 2*e3*a3*sin(A3);
+    d = Math.sqrt(Math.pow(x-Nx,2)+Math.pow(y-Ny,2))
+    Td = -Math.floor(Math.abs(T-newyears)/86400)*(T-newyears)/Math.abs(T-newyears);
+    Th = Math.floor(Math.abs(T-newyears)/3600 % 24);
+    Tm = Math.floor(Math.abs(T-newyears)/60 % 60);
+    Ts = Math.floor(Math.abs(T-newyears) % 60);
+    //update Screen
+    screen.setTransform(1,0,0,-1,screen.canvas.width/2,screen.canvas.height/2);
+    //clear screen
+    screen.beginPath();
+    screen.fillStyle = "black";
+    screen.rect(-screen.canvas.width/2,-screen.canvas.height/2,screen.canvas.width, screen.canvas.height);
+    screen.fill();
+    screen.closePath();
+    //Draw Sun
+    screen.beginPath();
+    screen.fillStyle = "yellow";
+    screen.ellipse((-camx)*zoom,(-camy)*zoom,Rsun*zoom,Rsun*zoom,0,0,2*Math.PI);
+    screen.fill();
+    screen.closePath();
+    //Draw Earth's Orbit
+    var t = 0;
+    while(t<p3){
+        var Ox = -(a3*(1-e3**2)*cos(180 - (360*(T+t-v3)/(p3)) - A3))/(1 + e3*cos(180 - (360*(T+t-v3))/(p3))) - 2*e3*a3*cos(A3);
+        var Oy =  (a3*(1-e3**2)*sin(180 - (360*(T+t-v3)/(p3)) - A3))/(1 + e3*cos(180 - (360*(T+t-v3))/(p3))) - 2*e3*a3*sin(A3);
+        var Ox2 = -(a3*(1-e3**2)*cos(180 - (360*(T+t+p3/360-v3)/(p3)) - A3))/(1 + e3*cos(180 - (360*(T+t+p3/360-v3))/(p3))) - 2*e3*a3*cos(A3);
+        var Oy2 =  (a3*(1-e3**2)*sin(180 - (360*(T+t+p3/360-v3)/(p3)) - A3))/(1 + e3*cos(180 - (360*(T+t+p3/360-v3))/(p3))) - 2*e3*a3*sin(A3);
+        screen.beginPath();
+        screen.moveTo((Ox-camx)*zoom,(Oy-camy)*zoom);
+        screen.lineTo((Ox2-camx)*zoom,(Oy2-camy)*zoom);
+        screen.lineWidth = 5.0;
+        screen.strokeStyle = "green";
+        screen.stroke();
+        
+        t += p3/360;
+    }
+    //Draw Earth
+    t3 = 180-(360*(T-v3))/p3 - A3;
+    r3 = (a3*(1-e3**2))/(1+e3*cos(t3+A3));
+    x = -r3*cos(t3)-2*e3*a3*cos(A3);
+    y = r3*sin(t3)-2*e3*a3*sin(A3);
+    camx = x;
+    camy = y;
+    screen.beginPath();
+    screen.fillStyle = "#00c8dc";
+    screen.ellipse((x-camx)*zoom,(y-camy)*zoom,(R3+230)*zoom,(R3+230)*zoom,0,0,2*Math.PI);
+    screen.fill();
+    screen.closePath();
+    screen.beginPath();
+    screen.fillStyle = "green";
+    screen.ellipse((x-camx)*zoom,(y-camy)*zoom,R3*zoom,R3*zoom,0,0,2*Math.PI);
+    screen.fill();
+    screen.closePath();
+    //Draw Special Orbits
+    screen.lineWidth = 2.0;
+    screen.beginPath();
+    screen.strokeStyle = "blue";
+    screen.ellipse((x-camx)*zoom,(y-camy)*zoom,42163.4021443*zoom,42163.4021443*zoom,0,0,2*Math.PI);
+    screen.stroke();
+    screen.closePath();
+
+    screen.beginPath();
+    screen.ellipse((x-camx)*zoom,(y-camy)*zoom,26561.2789484*zoom,26561.2789484*zoom,0,0,2*Math.PI);
+    screen.stroke();
+    screen.closePath();
+
+    screen.lineWidth = 1.0;
+    screen.beginPath();
+    screen.strokeStyle = "grey";
+    screen.ellipse((x-camx)*zoom,(y-camy)*zoom,(R3+425)*zoom,(R3+425)*zoom,0,0,2*Math.PI);
+    screen.stroke();
+    screen.closePath();
+
+    screen.beginPath();
+    screen.ellipse((x-camx)*zoom,(y-camy)*zoom,384748*zoom,384748*zoom,0,0,2*Math.PI);
+    screen.stroke();
+    screen.closePath();
+    //Draw Finish Line
+    screen.beginPath();
+    screen.moveTo((-camx)*zoom,(-camy)*zoom);
+    screen.lineTo((2*Nx-camx)*zoom,(2*Ny-camy)*zoom);
+    screen.lineWidth = 3.0;
+    screen.strokeStyle = "red";
+    screen.stroke();
+    //Draw All text information
+    screen.fillStyle = "green";
+    screen.font = "12px Arial";
+    screen.setTransform(1,0,0,1,screen.canvas.width/2,screen.canvas.height/2);
+    screen.textBaseline = "top";
+    screen.textAlign = "center";
+    screen.fillText("Earth",(x-camx)*zoom,-(y-camy-R3)*zoom+1);
+    screen.setTransform(-Nx/Math.sqrt(Nx*Nx+Ny*Ny),Ny/Math.sqrt(Nx*Nx+Ny*Ny),-Ny/Math.sqrt(Nx*Nx+Ny*Ny),-Nx/Math.sqrt(Nx*Nx+Ny*Ny),(Nx-camx)*zoom+screen.canvas.width/2,-(Ny-camy)*zoom+screen.canvas.height/2);
+    screen.fillStyle = "red";
+    screen.fillText("Earth at 2025",0,3);
+    screen.setTransform(1,0,0,1,0,0);
+    screen.textBaseline = "alphabetic";
+    screen.textAlign = "left";
+    screen.font = "32px Arial";
+    screen.fillStyle = "white";
+    screen.fillText("Time Till New Years: " + Td +" days "+Th+" hours "+Tm+" mins "+ Ts +" secs",0,32)
+    screen.fillText("Distance to newyears: " + (0.62137119*d).toFixed(1) + " mi",0,74);
+    screen.fillText("FPS: "+Math.round(1/dt),0,106);
+    if(newyears-T<0){
+        screen.textBaseline = "alphabetic";
+        screen.textAlign = "center";
+        screen.font = "32px Arial";
+        screen.fillStyle = "white";
+        screen.fillText("Happy New Year!",screen.canvas.width/2,screen.canvas.height*3/4);  
+    }
+    screen.setTransform(1,0,0,1,0,0);
+    screen.textBaseline = "alphabetic";
+    screen.textAlign = "right";
+    screen.font = "14px Arial";
+    screen.fillStyle = "white";
+    if(manual_scaling){
+        screen.fillText("Zooming with w and s",screen.canvas.width,screen.canvas.height - 30);
+        screen.fillText("Press f to switch back to Auto zoom",screen.canvas.width,screen.canvas.height-5);
+    }else{
+        screen.fillText("Zooming Automatically",screen.canvas.width,screen.canvas.height - 30);
+        screen.fillText("Press w or s to zoom manually",screen.canvas.width,screen.canvas.height-5);
+    }
+    _lastRAF = currentTime;
+}
+ function launchAnimation() {
+    requestAnimationFrame(_launchAnimationNow);
+    function _launchAnimationNow(currentTime) {
+        currentTime =  new Date().getTime()/1000;
+        _lastRAF = currentTime;
+        requestAnimationFrame(animate);
+    }
+}
+launchAnimation();
+</script>
+</html>
