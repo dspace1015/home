@@ -6,7 +6,7 @@
         body {margin: 0px;}
     </style>
 </head>
-<canvas id="myCanvas" width="1000" height="600" style="border:1px solid grey">You cant view it in schoology sadly you have to download it.</canvas>
+<canvas id="myCanvas" width="1000" height="600" style="border:1px solid grey">Your Browser does not support this file format</canvas>
 
 <script>
 const myCanvas = document.getElementById("myCanvas");
@@ -167,7 +167,7 @@ function animate(currentTime) {
     screen.fillText("Earth",(x-camx)*zoom,-(y-camy-R3)*zoom+1);
     screen.setTransform(-Nx/Math.sqrt(Nx*Nx+Ny*Ny),Ny/Math.sqrt(Nx*Nx+Ny*Ny),-Ny/Math.sqrt(Nx*Nx+Ny*Ny),-Nx/Math.sqrt(Nx*Nx+Ny*Ny),(Nx-camx)*zoom+screen.canvas.width/2,-(Ny-camy)*zoom+screen.canvas.height/2);
     screen.fillStyle = "red";
-    screen.fillText("Earth at 2025",0,3);
+    screen.fillText("Earth at 2026",0,3);
     screen.setTransform(1,0,0,1,0,0);
     screen.textBaseline = "alphabetic";
     screen.textAlign = "left";
@@ -209,3 +209,4 @@ launchAnimation();
 </script>
 
 </html>
+
